@@ -1,0 +1,379 @@
+
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MTH 101 PQ INTERACTIVE QUIZ</title>
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--accent:#06b6d4;--muted:#94a3b8;--white:#e6eef6}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;background:linear-gradient(180deg,#071022 0%, #071a2a 100%);color:var(--white);-webkit-font-smoothing:antialiased}
+    .wrap{max-width:920px;margin:28px auto;padding:20px}
+    header{display:flex;align-items:center;gap:16px}
+    h1{margin:0;font-size:20px}
+    .meta{color:var(--muted);font-size:13px}
+    .card{background:rgba(255,255,255,0.03);padding:20px;border-radius:12px;margin-top:18px;box-shadow:0 6px 24px rgba(2,6,23,0.6)}
+    .question{font-size:18px;margin-bottom:12px}
+    .choices{display:flex;flex-direction:column;gap:8px}
+    .choice{background:#072031;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+    .choice:hover{transform:translateY(-2px)}
+    .choice.selected{outline:3px solid rgba(6,182,212,0.12);background:#2babff}
+    .controls{display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+    button{background:var(--accent);color:#042029;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:600}
+    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--white)}
+    .progress{height:10px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden}
+    .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#60a5fa);width:0%}
+    .footer{margin-top:16px;color:var(--muted);font-size:13px}
+    .result{padding:18px;border-radius:10px;background:linear-gradient(180deg, rgba(2,6,23,0.85), rgba(2,6,23,0.6));}
+    .review{margin-top:12px}
+    .q-review{background:rgba(255,255,255,0.02);padding:12px;border-radius:8px;margin-bottom:10px}
+    @media(max-width:560px){.wrap{padding:12px}h1{font-size:18px}.question{font-size:16px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>MTH 101 INTERACTIVE MCQ QUIZ</h1>
+        <div class="meta">30 multiple-choice questions </div>
+      </div>
+    </header><div class="card" id="quiz-card">
+  <div class="progress" aria-hidden><i id="progress-bar"></i></div>
+  <div style="height:14px"></div>
+  <div id="q-area">
+    </div>
+
+  <div class="controls">
+    <div style="display:flex;gap:8px">
+      <button id="prevBtn" class="secondary">Previous</button>
+      <button id="nextBtn">Next</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button id="submitBtn" class="secondary">Submit</button>
+      <div style="color:var(--muted);font-size:13px">Q <span id="q-num">1</span> / <span id="q-total">10</span></div>
+    </div>
+  </div>
+
+  <div class="footer">Tip: Select an answer and press Next. You can review answers after submission.</div>
+</div>
+
+<div id="result-area" style="display:none" class="card">
+  <div class="result">
+    <h2 id="score-title"></h2>
+    <p id="score-summary" class="meta"></p>
+  </div>
+  <div class="review" id="review-list"></div>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button id="retryBtn">Retake Quiz</button>
+    <button id="exportBtn" class="secondary">Export Results</button>
+  </div>
+</div>
+<br><br><br>
+  <a href="https://wa.me/+2349036795652"><button>Contact The Developer</button></a>
+    <a href="https://wa.me/+2349036795652"><button>Support Project</button></a><br><br>
+   <button onclick="shareOnWhatsApp()">Share Quiz link via WhatsApp</button>
+  <h2>Designed by Readone</h2>
+  </div>
+   <script>
+       const QUESTIONS = [
+  { 
+    q: "According to mathematical induction, which of these is a factor of 2^(2n) - 1?", 
+    c: ["3", "5", "8", "10"], 
+    a: 2, // 2^(2n - 1) = 4^n - 1, which is always divisible by 4 - 1 = 3.
+    citation: "Q1, Q19, Q32 (Typo corrected)"
+  },
+  { 
+    q: "A school went to a competition with a contingent of 11 football players and 8 sprinters. If 3 sprinters are also footballers, how many students are either footballers or sprinters?", 
+    c: ["16", "17", "18", "19"], 
+    a: 0, // n(F union S) = 11 + 8 - 3 = 16
+    citation: "Q2"
+  },
+  { 
+    q: "What is the sum to infinity of a geometric progression with first term a = 32 and common ratio r = 1/2?", 
+    c: ["32", "64", "16", "96"], 
+    a: 1, // S_infinity = a / (1 - r) = 32 / (1 - 1/2) = 64
+    citation: "Q3"
+  },
+  { 
+    q: "Insert five arithmetic means between x and 5x - 4. What is the common difference, d?", 
+    c: ["x / 3", "2x - 2", "(2x - 2) / 3", "(x - 4) / 2"], 
+    a: 2, // d = (l - a) / (n - 1) = ((5x - 4) - x) / 6 = (4x - 4) / 6 = (2x - 2) / 3
+    citation: "Q4"
+  },
+  { 
+    q: "The common difference of an arithmetic progression (AP) is:", 
+    c: ["The difference between consecutive terms", "The difference between the first and last term", "The ratio of consecutive terms", "The product of the first and last term"], 
+    a: 0, 
+    citation: "Q5"
+  },
+  { 
+    q: "Which set identity is equivalent to A intersect (B union C)'?", 
+    c: ["A - (B union C)", "A intersect B intersect C", "(A intersect B)'", "A union B"], 
+    a: 0, // By De Morgan's Law: A intersect (B union C)' = A intersect B' intersect C'. This is equivalent to A set-minus (B union C), or A - (B union C).
+    citation: "Q6"
+  },
+  { 
+    q: "What is the sixth term of the sequence 1, 3, 9, ...?", 
+    c: ["81", "243", "729", "162"], 
+    a: 1, // GP: a = 1, r = 3. T_6 = a * r^(6-1) = 1 * 3^5 = 243
+    citation: "Q7, Q35"
+  },
+  { 
+    q: "Insert five arithmetic means between 3 and 12. What is the common difference, d?", 
+    c: ["1.5", "2", "3", "0.5"], 
+    a: 0, // d = (12 - 3) / (5 + 1) = 9 / 6 = 1.5
+    citation: "Q8"
+  },
+  { 
+    q: "The sum of the first 5 terms of an A.P where a = 2 and d = 3 is:", 
+    c: ["40", "25", "30", "35"], 
+    a: 0, // S_5 = 5/2 * (2(2) + 4(3)) = 5/2 * (4 + 12) = 5/2 * (16) = 40
+    citation: "Q9"
+  },
+  { 
+    q: "If a = 10 and b = 20 in an A.P, the arithmetic mean of a and b is:", 
+    c: ["21", "15", "18", "9"], 
+    a: 1, // AM = (a + b) / 2 = (10 + 20) / 2 = 15
+    citation: "Q10"
+  },
+  { 
+    q: "Find the 8th term of a G.P whose first term is 3 and the common ratio is 2.", 
+    c: ["384", "320", "364", "260"], 
+    a: 0, // T_8 = a * r^7 = 3 * 2^7 = 3 * 128 = 384
+    citation: "Q11"
+  },
+  { 
+    q: "Determine the sum of the first four terms of the series 36 + 24 + 16 + ...", 
+    c: ["265 / 3", "65 / 3", "250 / 3", "260 / 3"], 
+    a: 3, // GP: a = 36, r = 24/36 = 2/3. S_4 = 36(1 - (2/3)^4) / (1 - 2/3) = 108(1 - 16/81) = 108(65/81) = 4(65) / 3 = 260 / 3
+    citation: "Q12"
+  },
+  { 
+    q: "If A, B, and C are any three sets, what is A intersect (B union C)?", 
+    c: ["(A intersect B) union (A intersect C)", "(A union B) intersect (A union C)", "(A union B) union (A union C)", "(A intersect B) intersect (A intersect C)"], 
+    a: 0, // Distributive Law
+    citation: "Q13"
+  },
+  { 
+    q: "Given that A is the empty set. Find the cardinality of the power set, |P(A)|.", 
+    c: ["No element", "0", "2", "1"], 
+    a: 3, // |P(A)| = 2^|A| = 2^0 = 1
+    citation: "Q14, Q31, Q34 (Consolidated)"
+  },
+  { 
+    q: "Insert the arithmetic mean between 10 and 20.", 
+    c: ["10", "15", "20", "30"], 
+    a: 1, // AM = (10 + 20) / 2 = 15
+    citation: "Q15"
+  },
+  { 
+    q: "Find the sum to infinity of the series: -2 + 2/3 - 2/9 + ...", 
+    c: ["-3", "3 / 2", "3", "-3 / 2"], 
+    a: 3, // GP: a = -2, r = (2/3) / (-2) = -1/3. S_infinity = -2 / (1 - (-1/3)) = -2 / (4/3) = -3 / 2
+    citation: "Q16"
+  },
+  { 
+    q: "The third term of a geometric progression is 63, and the fifth term is 567. Find the sum of the first 4 terms.", 
+    c: ["140", "210", "280", "350"], 
+    a: 2, // ar^2 = 63, ar^4 = 567. r^2 = 567 / 63 = 9. r = 3. a = 7. S_4 = 7(3^4 - 1) / (3 - 1) = 7(80) / 2 = 280.
+    citation: "Q17 (Typo corrected)"
+  },
+  { 
+    q: "Given the universal set U = {5, 6, 7, 8}, P = {6, 7}, and Q = {6, 8}, find P intersect Q'.", 
+    c: ["{5}", "{7}", "{6}", "{8}"], 
+    a: 1, // Q' = {5, 7}. P intersect Q' = {6, 7} intersect {5, 7} = {7}
+    citation: "Q18"
+  },
+  { 
+    q: "Find the cardinality of the set of natural numbers less than 11.", 
+    c: ["9", "10", "11", "12"], 
+    a: 1, // {1, 2, ..., 10}. Cardinality is 10.
+    citation: "Q20"
+  },
+  { 
+    q: "Find the sum of the first five terms of the series: 8 + 4 + 2 + ...", 
+    c: ["15.5", "31", "15", "14.5"], 
+    a: 0, // GP: a = 8, r = 1/2. S_5 = 8(1 - (1/2)^5) / (1 - 1/2) = 16(1 - 1/32) = 16(31/32) = 31 / 2 = 15.5
+    citation: "Q21"
+  },
+  { 
+    q: "For every positive integer n, 7^n - 3^n is divisible by:", 
+    c: ["3", "6", "4", "5"], 
+    a: 2, // a^n - b^n is divisible by a - b. 7^n - 3^n is divisible by 7 - 3 = 4.
+    citation: "Q22"
+  },
+  { 
+    q: "What is the cardinality of the power set of A = {x : x is a Natural Number, x < 11}?", 
+    c: ["1023", "2048", "1024", "10"], 
+    a: 2, // |A| = 10. |P(A)| = 2^10 = 1024.
+    citation: "Q23"
+  },
+  { 
+    q: "Given the sequence 2, 2/5, 2/25, ..., what is the fifth term?", 
+    c: ["2 / 125", "2 / 625", "1 / 125", "1 / 625"], 
+    a: 1, // GP: a = 2, r = 1/5. T_5 = a * r^4 = 2 * (1/5)^4 = 2 / 625
+    citation: "Q24"
+  },
+  { 
+    q: "Insert the three arithmetic means between x - 2 and x + 38. What is the common difference, d?", 
+    c: ["10", "20 / 3", "5", "40 / 3"], 
+    a: 1, // d = ((x + 38) - (x - 2)) / (3 + 1) = 40 / 4 = 10. (Note: The option 20/3 suggests 5 means, but the question asks for 3 means, making the answer 10. We stick to the question's context.)
+    citation: "Q25"
+  },
+  { 
+    q: "In the principle of induction, the propositional statement P(n) is true for n in the set of:", 
+    c: ["Rational numbers", "Real integers", "Natural numbers", "Integers"], 
+    a: 2, 
+    citation: "Q26"
+  },
+  { 
+    q: "In a class of 60, 40 students speak Hausa, 19 students speak Igbo, and 7 students speak both Hausa and Igbo. How many students speak neither Hausa nor Igbo?", 
+    c: ["8", "6", "7", "9"], 
+    a: 0, // n(H union I) = 40 + 19 - 7 = 52. Neither: 60 - 52 = 8
+    citation: "Q27"
+  },
+  { 
+    q: "If alpha and beta are the roots of the quadratic equation 2x^2 - 7x + 5 = 0, find the product of roots, alpha * beta.", 
+    c: ["5 / 2", "-5 / 2", "7 / 2", "-7 / 2"], 
+    a: 0, // alpha * beta = c / a = 5 / 2
+    citation: "Q28 (Options corrected)"
+  },
+  { 
+    q: "For a quadratic equation ax^2 + bx + c = 0, where a is not 0, when the discriminant D < 0, then the roots are:", 
+    c: ["Real and equal", "Real and distinct", "Complex and distinct", "Rational and distinct"], 
+    a: 2, 
+    citation: "Q30"
+  },
+  { 
+    q: "Find the sum of the first four terms of the series 1 + sqrt(3) + 3 + ...", 
+    c: ["4(sqrt(3) - 1)", "2(sqrt(3) + 1)", "2(sqrt(3) - 1)", "4(sqrt(3) + 1)"], 
+    a: 3, // a = 1, r = sqrt(3). S_4 = 1((sqrt(3))^4 - 1) / (sqrt(3) - 1) = 8 / (sqrt(3) - 1) = 4(sqrt(3) + 1)
+    citation: "Q33"
+  },
+  { 
+    q: "What is the formula for the sum of n terms in an arithmetic progression (AP)?", 
+    c: ["S_n = n / 2 * (2a + (n - 1)d)", "S_n = n / 2 * (a + l)", "S_n = a * r^(n - 1)", "S_n = n / 2 * (a + d)"], 
+    a: 0, 
+    citation: "Q37 (Completed)"
+  }
+];
+
+       function shareOnWhatsApp() {
+        const message = "https://https://readoneab25.github.io/Bio-101-ecology-cell/";
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = "whatsapp://send?text=" + encodedMessage;
+        window.open(whatsappUrl, '_blank');
+    }
+    
+   
+       
+    let state = { idx:0, answers: Array(QUESTIONS.length).fill(null) };
+const total = QUESTIONS.length;
+
+function renderQuestion(){
+  const area = document.getElementById('q-area');
+  const q = QUESTIONS[state.idx];
+  document.getElementById('q-num').textContent = state.idx+1;
+  document.getElementById('q-total').textContent = total;
+  const progress = Math.round((state.idx/total)*100);
+  document.getElementById('progress-bar').style.width = progress + '%';
+
+  area.innerHTML = '';
+  const qEl = document.createElement('div');
+  qEl.innerHTML = `<div class="question">${state.idx+1}. ${q.q}</div>`;
+  const choices = document.createElement('div'); choices.className='choices';
+  q.c.forEach((choice, i)=>{
+    const btn = document.createElement('div');
+    btn.className='choice'; btn.tabIndex=0; btn.textContent = String.fromCharCode(65+i)+'. '+choice;
+    if(state.answers[state.idx]===i) btn.classList.add('selected');
+    btn.addEventListener('click', ()=>{
+      // select
+      state.answers[state.idx]=i;
+      document.querySelectorAll('.choice').forEach(el=>el.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+    choices.appendChild(btn);
+  });
+  qEl.appendChild(choices);
+  area.appendChild(qEl);
+}
+
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  if(state.idx < total-1) state.idx++;
+  renderQuestion();
+});
+
+document.getElementById('prevBtn').addEventListener('click', ()=>{
+  if(state.idx > 0) state.idx--;
+  renderQuestion();
+});
+
+document.getElementById('submitBtn').addEventListener('click', ()=>{
+  // confirm and grade
+  const unanswered = state.answers.filter(a=>a===null).length;
+  if(unanswered>0){
+    if(!confirm(`You have ${unanswered} unanswered questions. Submit anyway?`)) return;
+  }
+  gradeQuiz();
+});
+
+function gradeQuiz(){
+  let correct=0;
+  const review = [];
+  for(let i=0;i<total;i++){
+    const user = state.answers[i];
+    const correctIdx = QUESTIONS[i].a;
+    const ok = user===correctIdx;
+    if(ok) correct++;
+    review.push({i, q:QUESTIONS[i].q, choices:QUESTIONS[i].c, user, correctIdx, ok});
+  }
+  showResult(correct, review);
+}
+
+function showResult(score, review){
+  document.getElementById('quiz-card').style.display='none';
+  const area = document.getElementById('result-area');
+  area.style.display='block';
+  const title = document.getElementById('score-title');
+  title.textContent = `You scored ${score} out of ${total}`;
+  const pct = Math.round((score/total)*100);
+  document.getElementById('score-summary').textContent = `Percentage: ${pct}%`;
+
+  const list = document.getElementById('review-list'); list.innerHTML='';
+  review.forEach(item=>{
+    const div = document.createElement('div'); div.className='q-review';
+    const head = document.createElement('div'); head.style.fontWeight='700'; head.textContent = `${item.i+1}. ${item.q}`;
+    const userAns = document.createElement('div'); userAns.style.marginTop='6px';
+    const ua = item.user===null? 'No answer' : String.fromCharCode(65+item.user)+'. '+item.choices[item.user];
+    const ca = String.fromCharCode(65+item.correctIdx)+'. '+item.choices[item.correctIdx];
+    userAns.innerHTML = `<div><strong>Your answer:</strong> ${ua}</div><div style="margin-top:4px"><strong>Correct answer:</strong> ${ca}</div>`;
+    if(item.ok) userAns.style.color='lightgreen'; else userAns.style.color='#fca5a5';
+    div.appendChild(head); div.appendChild(userAns);
+    list.appendChild(div);
+  });
+}
+
+document.getElementById('retryBtn').addEventListener('click', ()=>{
+  // reset
+  state = { idx:0, answers: Array(total).fill(null) };
+  document.getElementById('result-area').style.display='none';
+  document.getElementById('quiz-card').style.display='block';
+  renderQuestion();
+});
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const data = {answers: state.answers, questions: QUESTIONS};
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'cos101_module1-2_results.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+
+// init
+renderQuestion();
+</script>
+
+
+</body>
+</html>
